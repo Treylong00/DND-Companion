@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}D&D Character Sheets{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            background-color: #f5f5f5;
+        }
+        .ability-score {
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .ability-score .score {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .ability-score .modifier {
+            font-size: 1.5rem;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .character-sheet {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .skill-list {
+            column-count: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="mb-4">
+            <h1 class="display-4 text-center">{% block header %}D&D Character Sheets{% endblock %}</h1>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info">
+                    <ul class="mb-0">
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function calculateModifier(score) {
+            return Math.floor((score - 10) / 2);
+        }
+
+        function updateModifiers() {
+            document.querySelectorAll('.ability-score').forEach(abilityDiv => {
+                const scoreInput = abilityDiv.querySelector('input');
+                const modifierSpan = abilityDiv.querySelector('.modifier');
+
+                if (scoreInput && modifierSpan) {
+                    const modifier = calculateModifier(parseInt(scoreInput.value) || 10);
+                    modifierSpan.textContent = modifier >= 0 ? `+${modifier}` : modifier;
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateModifiers();
+
+            // Update when ability scores change
+            document.querySelectorAll('.ability-score input').forEach(input => {
+                input.addEventListener('input', updateModifiers);
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

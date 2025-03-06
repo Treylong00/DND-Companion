@@ -1,0 +1,148 @@
+<!-- templates/character_form.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit' if character else 'New' }} Character - D&D Character Sheet{% endblock %}
+{% block header %}{{ 'Edit' if character else 'Create' }} Character{% endblock %}
+
+{% block content %}
+<div class="character-sheet">
+    <form method="post">
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <h3>Basic Information</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="name" class="form-label">Character Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ character.name if character else '' }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="race" class="form-label">Race</label>
+                        <input type="text" class="form-control" id="race" name="race" value="{{ character.race if character else '' }}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="class" class="form-label">Class</label>
+                        <input type="text" class="form-control" id="class" name="class" value="{{ character.class if character else '' }}">
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label for="level" class="form-label">Level</label>
+                        <input type="number" class="form-control" id="level" name="level" min="1" max="20" value="{{ character.level if character else 1 }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ability Scores -->
+            <div class="col-md-6 mb-3">
+                <h3>Ability Scores</h3>
+                <div class="row">
+                    {% for ability in ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] %}
+                        <div class="col-md-4 col-6 mb-3">
+                            <div class="ability-score">
+                                <label for="{{ ability }}" class="form-label">{{ ability|upper }}</label>
+                                <input type="number" class="form-control text-center" id="{{ ability }}" name="{{ ability }}" min="1" max="30" value="{{ character.abilities[ability] if character else 10 }}">
+                                <div class="modifier">+0</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Character Stats -->
+            <div class="col-md-6 mb-3">
+                <h3>Character Stats</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="max_hp" class="form-label">Max HP</label>
+                        <input type="number" class="form-control" id="max_hp" name="max_hp" min="1" value="{{ character.hp.max if character else 10 }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="current_hp" class="form-label">Current HP</label>
+                        <input type="number" class="form-control" id="current_hp" name="current_hp" min="0" value="{{ character.hp.current if character else 10 }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="armor_class" class="form-label">Armor Class</label>
+                        <input type="number" class="form-control" id="armor_class" name="armor_class" min="1" value="{{ character.armor_class if character else 10 }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="proficiency_bonus" class="form-label">Proficiency Bonus</label>
+                        <input type="number" class="form-control" id="proficiency_bonus" name="proficiency_bonus" min="0" value="{{ character.proficiency_bonus if character else 2 }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Skills -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Skills</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="skill-list">
+                            {% for skill in ["Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception", "History", "Insight", "Intimidation", "Investigation", "Medicine", "Nature", "Perception", "Performance", "Persuasion", "Religion", "Sleight of Hand", "Stealth", "Survival"] %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="skill_{{ loop.index }}" name="skills" value="{{ skill }}"
+                                        {% if character and skill in character.skills %}checked{% endif %}>
+                                    <label class="form-check-label" for="skill_{{ loop.index }}">{{ skill }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equipment -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Equipment</h3>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="equipment" name="equipment" rows="6">{{ character.equipment|join('\n') if character else '' }}</textarea>
+                        <small class="form-text text-muted">Enter one item per line</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spells -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Spells</h3>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="spells" name="spells" rows="6">{{ character.spells|join('\n') if character else '' }}</textarea>
+                        <small class="form-text text-muted">Enter one spell per line</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Background & Traits -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Background & Traits</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="background" class="form-label">Background</label>
+                            <textarea class="form-control" id="background" name="background" rows="3">{{ character.background if character else '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="traits" class="form-label">Traits</label>
+                            <textarea class="form-control" id="traits" name="traits" rows="3">{{ character.traits if character else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-primary">{{ 'Update' if character else 'Create' }} Character</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

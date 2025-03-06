@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Import Character from PDF - D&D Character Sheet{% endblock %}
+{% block header %}Import Character from PDF{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Upload Character Sheet PDF</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="pdf_file" class="form-label">Character Sheet PDF</label>
+                        <input class="form-control" type="file" id="pdf_file" name="pdf_file" accept=".pdf" required>
+                        <div class="form-text">
+                            Upload a fillable PDF character sheet. The application will try to extract character information from the form fields.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <p><strong>Supported PDF types:</strong></p>
+                        <ul>
+                            <li>D&D 5e Standard Character Sheet</li>
+                            <li>D&D 5e Fillable Character Sheet by WotC</li>
+                            <li>Other fillable character sheets with standard field names</li>
+                        </ul>
+                        <p class="text-warning">Note: PDF importing is not 100% accurate and may require manual adjustments after import.</p>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Import Character</button>
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Import Tips</h3>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>Make sure you're using a <strong>fillable PDF</strong> character sheet where form fields can be filled digitally.</li>
+                    <li>Fill out as much information as possible in the PDF before importing.</li>
+                    <li>After import, review the character data and make any necessary adjustments.</li>
+                    <li>Common fields that may need adjustment: skills, spells, and equipment lists.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

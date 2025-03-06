@@ -1,0 +1,23 @@
+2025-03-05 18:58:06,339 - ocr_import - INFO - Starting OCR import for C:\Users\Yung Yert\OneDrive\D&D\Companion App\uploads\Aries.pdf
+2025-03-05 18:58:06,930 - ocr_import - INFO - Converted PDF to 3 images
+2025-03-05 18:58:08,190 - ocr_import - INFO - Starting OCR extraction
+2025-03-05 18:58:08,191 - ocr_import - INFO - Found character name: RACE ALIGNMENT EXPERIENCE POINTS
+2025-03-05 18:58:08,192 - ocr_import - INFO - Found race: ALIGNMENT EXPERIENCE POINTS
+2025-03-05 18:58:08,192 - ocr_import - INFO - Found strength score: 15
+2025-03-05 18:58:08,193 - ocr_import - INFO - Found dexterity score: 15
+2025-03-05 18:58:08,194 - ocr_import - INFO - Found constitution score: 3
+2025-03-05 18:58:08,194 - ocr_import - INFO - Found wisdom score: 3
+2025-03-05 18:58:08,194 - ocr_import - INFO - Found charisma score: 3
+2025-03-05 18:58:08,200 - ocr_import - INFO - Found skill: History
+2025-03-05 18:58:08,206 - ocr_import - INFO - Found 1 equipment items
+2025-03-05 18:58:08,206 - ocr_import - INFO - Found traits section
+2025-03-05 18:58:08,207 - ocr_import - INFO - OCR extraction complete
+2025-03-05 18:58:08,207 - ocr_import - INFO - Processing second page
+2025-03-05 18:58:08,773 - ocr_import - INFO - Found background on second page
+2025-03-05 18:58:08,773 - ocr_import - INFO - Character saved with ID: 20250305185808
+2025-03-05 18:58:08,777 - werkzeug - INFO - 127.0.0.1 - - [05/Mar/2025 18:58:08] "[32mPOST /import HTTP/1.1[0m" 302 -
+2025-03-05 18:58:08,796 - werkzeug - INFO - 127.0.0.1 - - [05/Mar/2025 18:58:08] "GET /character/20250305185808 HTTP/1.1" 200 -
+2025-03-05 18:58:19,309 - werkzeug - INFO - 127.0.0.1 - - [05/Mar/2025 18:58:19] "GET / HTTP/1.1" 200 -
+2025-03-05 18:58:21,680 - werkzeug - INFO - 127.0.0.1 - - [05/Mar/2025 18:58:21] "[32mPOST /character/20250305185808/delete HTTP/1.1[0m" 302 -
+2025-03-05 18:58:21,686 - werkzeug - INFO - 127.0.0.1 - - [05/Mar/2025 18:58:21] "GET / HTTP/1.1" 200 -
+2025-03-05 18:58:24,005 - werkzeug - INFO - 127.0.0.1 - - [05/Mar/2025 18:58:24] "GET /import HTTP/1.1" 200 -

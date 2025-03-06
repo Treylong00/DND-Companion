@@ -1,0 +1,138 @@
+<!-- templates/character.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ character.name }} - D&D Character Sheet{% endblock %}
+{% block header %}{{ character.name }}{% endblock %}
+
+{% block content %}
+<div class="character-sheet">
+    <div class="mb-4 d-flex justify-content-between">
+        <h2>{{ character.race }} {{ character.class }} (Level {{ character.level }})</h2>
+        <div>
+            <a href="{{ url_for('edit_character', character_id=character.id) }}" class="btn btn-warning">Edit</a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Ability Scores -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Ability Scores</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for ability in ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] %}
+                            <div class="col-md-4 col-6 mb-3">
+                                <div class="ability-score">
+                                    <div class="ability-name">{{ ability|upper }}</div>
+                                    <div class="score">{{ character.abilities[ability] }}</div>
+                                    <div class="modifier">
+                                        {% set modifier = ((character.abilities[ability] - 10) // 2) %}
+                                        {{ '+' + modifier|string if modifier >= 0 else modifier }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Character Stats -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Character Stats</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Hit Points:</strong> {{ character.hp.current }}/{{ character.hp.max }}</p>
+                            <p><strong>Armor Class:</strong> {{ character.armor_class }}</p>
+                            <p><strong>Proficiency Bonus:</strong> +{{ character.proficiency_bonus }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Skills -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Skills</h3>
+                </div>
+                <div class="card-body">
+                    <div class="skill-list">
+                        {% for skill in character.skills %}
+                            <p>{{ skill }}</p>
+                        {% else %}
+                            <p>No skills defined.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipment -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Equipment</h3>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        {% for item in character.equipment %}
+                            {% if item.strip() %}
+                                <li>{{ item }}</li>
+                            {% endif %}
+                        {% else %}
+                            <p>No equipment listed.</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spells -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Spells</h3>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        {% for spell in character.spells %}
+                            {% if spell.strip() %}
+                                <li>{{ spell }}</li>
+                            {% endif %}
+                        {% else %}
+                            <p>No spells listed.</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background & Traits -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Background & Traits</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Background</h4>
+                    <p>{{ character.background or 'No background information.' }}</p>
+
+                    <h4>Traits</h4>
+                    <p>{{ character.traits or 'No traits defined.' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
