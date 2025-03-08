@@ -1,4 +1,3 @@
-<!-- templates/character_form.html -->
 {% extends 'base.html' %}
 
 {% block title %}{{ 'Edit' if character else 'New' }} Character - D&D Character Sheet{% endblock %}
@@ -39,7 +38,6 @@
                             <div class="ability-score">
                                 <label for="{{ ability }}" class="form-label">{{ ability|upper }}</label>
                                 <input type="number" class="form-control text-center" id="{{ ability }}" name="{{ ability }}" min="1" max="30" value="{{ character.abilities[ability] if character else 10 }}">
-                                <div class="modifier">+0</div>
                             </div>
                         </div>
                     {% endfor %}
@@ -82,7 +80,7 @@
                             {% for skill in ["Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception", "History", "Insight", "Intimidation", "Investigation", "Medicine", "Nature", "Perception", "Performance", "Persuasion", "Religion", "Sleight of Hand", "Stealth", "Survival"] %}
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="skill_{{ loop.index }}" name="skills" value="{{ skill }}"
-                                        {% if character and skill in character.skills %}checked{% endif %}>
+                                        {% if proficient_skills is defined and skill in proficient_skills %}checked{% elif character and character.skills[0] is string and skill in character.skills %}checked{% endif %}>
                                     <label class="form-check-label" for="skill_{{ loop.index }}">{{ skill }}</label>
                                 </div>
                             {% endfor %}
@@ -104,18 +102,81 @@
                 </div>
             </div>
 
-            <!-- Spells -->
+            <!-- Spellcasting Information -->
+            {% if character and character.spellcasting %}
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Spellcasting</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="spellcasting_class" class="form-label">Spellcasting Class</label>
+                                <input type="text" class="form-control" id="spellcasting_class" name="spellcasting_class" value="{{ character.spellcasting.class }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="spellcasting_ability" class="form-label">Spellcasting Ability</label>
+                                <select class="form-control" id="spellcasting_ability" name="spellcasting_ability">
+                                    <option value="">None</option>
+                                    <option value="intelligence" {% if character.spellcasting.ability == 'intelligence' %}selected{% endif %}>Intelligence</option>
+                                    <option value="wisdom" {% if character.spellcasting.ability == 'wisdom' %}selected{% endif %}>Wisdom</option>
+                                    <option value="charisma" {% if character.spellcasting.ability == 'charisma' %}selected{% endif %}>Charisma</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="cantrips" class="form-label">Cantrips</label>
+                                <textarea class="form-control" id="cantrips" name="cantrips" rows="4">{{ character.spellcasting.cantrips|join('\n') if character.spellcasting.cantrips }}</textarea>
+                                <small class="form-text text-muted">Enter one cantrip per line</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="spells_level_1" class="form-label">Level 1 Spells</label>
+                                <textarea class="form-control" id="spells_level_1" name="spells_level_1" rows="4">{{ spell_lists.level1 if spell_lists is defined else '' }}</textarea>
+                                <small class="form-text text-muted">Enter one spell per line</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="spells_level_2" class="form-label">Level 2 Spells</label>
+                                <textarea class="form-control" id="spells_level_2" name="spells_level_2" rows="4">{{ spell_lists.level2 if spell_lists is defined else '' }}</textarea>
+                                <small class="form-text text-muted">Enter one spell per line</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="spells_level_3" class="form-label">Level 3 Spells</label>
+                                <textarea class="form-control" id="spells_level_3" name="spells_level_3" rows="4">{{ spell_lists.level3 if spell_lists is defined else '' }}</textarea>
+                                <small class="form-text text-muted">Enter one spell per line</small>
+                            </div>
+                        </div>
+
+                        <!-- Additional spell levels as needed -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="spells_level_4" class="form-label">Level 4+ Spells</label>
+                                <textarea class="form-control" id="spells_level_4" name="spells_level_4" rows="4">{{ spell_lists.level4plus if spell_lists is defined else '' }}</textarea>
+                                <small class="form-text text-muted">Format: Spell Name (Level X)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Simple spells textarea for new characters -->
             <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-header">
                         <h3>Spells</h3>
                     </div>
                     <div class="card-body">
-                        <textarea class="form-control" id="spells" name="spells" rows="6">{{ character.spells|join('\n') if character else '' }}</textarea>
-                        <small class="form-text text-muted">Enter one spell per line</small>
+                        <textarea class="form-control" id="spells" name="spells" rows="6">{{ character.spells|join('\n') if character and character.spells else '' }}</textarea>
+                        <small class="form-text text-muted">Enter one spell per line. For imported characters, use the edit button after creation.</small>
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <!-- Background & Traits -->
             <div class="col-md-6 mb-4">

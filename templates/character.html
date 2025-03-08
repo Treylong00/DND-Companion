@@ -1,138 +1,289 @@
-<!-- templates/character.html -->
-{% extends 'base.html' %}
-
-{% block title %}{{ character.name }} - D&D Character Sheet{% endblock %}
-{% block header %}{{ character.name }}{% endblock %}
-
+{% extends "base.html" %}
 {% block content %}
-<div class="character-sheet">
-    <div class="mb-4 d-flex justify-content-between">
-        <h2>{{ character.race }} {{ character.class }} (Level {{ character.level }})</h2>
-        <div>
-            <a href="{{ url_for('edit_character', character_id=character.id) }}" class="btn btn-warning">Edit</a>
-            <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to List</a>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ character.name }}</h1>
+            <h3>{{ character.race }} {{ character.class }} (Level {{ character.level }})</h3>
+            <div class="bg-light p-3 mb-3">
+                <h4>Background: {{ character.background }}</h4>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('edit_character', character_id=character.id) }}" class="btn btn-primary">Edit</a>
+            <form method="POST" action="{{ url_for('delete_character', character_id=character.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this character?');">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
         </div>
     </div>
 
-    <div class="row mb-4">
-        <!-- Ability Scores -->
-        <div class="col-md-6">
-            <div class="card">
+    <div class="row mt-4">
+        <!-- Abilities -->
+        <div class="col-md-4">
+            <div class="card mb-4">
                 <div class="card-header">
-                    <h3>Ability Scores</h3>
+                    <h4>Abilities</h4>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        {% for ability in ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] %}
-                            <div class="col-md-4 col-6 mb-3">
-                                <div class="ability-score">
-                                    <div class="ability-name">{{ ability|upper }}</div>
-                                    <div class="score">{{ character.abilities[ability] }}</div>
-                                    <div class="modifier">
-                                        {% set modifier = ((character.abilities[ability] - 10) // 2) %}
-                                        {{ '+' + modifier|string if modifier >= 0 else modifier }}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Ability</th>
+                                <th>Score</th>
+                                <th>Modifier</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ability_name, score in character.abilities.items() %}
+                            <tr>
+                                <td>{{ ability_name|capitalize }}</td>
+                                <td>{{ score }}</td>
+                                <td>
+                                    {% if character.ability_modifiers %}
+                                        {% set modifier = character.ability_modifiers[ability_name] %}
+                                        {{ "+" if modifier >= 0 }}{{ modifier }}
+                                    {% else %}
+                                        {% set modifier = ((score - 10) // 2) %}
+                                        {{ "+" if modifier >= 0 }}{{ modifier }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Combat Stats -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Combat</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Armor Class:</strong> {{ character.armor_class }}</p>
+                    <p><strong>Hit Points:</strong> {{ character.hp.current }}/{{ character.hp.max }}</p>
+                    <p><strong>Proficiency Bonus:</strong> +{{ character.proficiency_bonus }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Skills</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% if character.skills[0] is mapping %}
+                            <!-- Show only proficient skills for the new format -->
+                            {% for skill in character.skills %}
+                                {% if skill.proficient %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ skill.name }}
+                                    <span class="badge bg-primary">
+                                        {{ "+" if skill.bonus >= 0 }}{{ skill.bonus }}
+                                    </span>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <!-- Support for old format -->
+                            {% for skill_name in character.skills %}
+                                <li class="list-group-item">
+                                    {{ skill_name }}
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipment & Spells -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Equipment</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for item in character.equipment %}
+                            {% if item %}
+                                <li class="list-group-item">{{ item }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spellcasting -->
+    {% if character.spellcasting and character.spellcasting.class %}
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Spellcasting</h4>
+                    <div>
+                        <span class="badge bg-info me-2">{{ character.spellcasting.class|capitalize }} Spells</span>
+                        {% if character.spellcasting.spell_save_dc > 0 %}
+                            <span class="badge bg-secondary me-2">Save DC: {{ character.spellcasting.spell_save_dc }}</span>
+                        {% endif %}
+                        {% if character.spellcasting.spell_attack_bonus > 0 %}
+                            <span class="badge bg-secondary">Attack: +{{ character.spellcasting.spell_attack_bonus }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Spell Slots -->
+                    <div class="mb-4">
+                        <h5>Spell Slots</h5>
+                        <div class="row g-2">
+                            {% for level, slots in character.spellcasting.spell_slots.items() %}
+                                {% if slots.total > 0 %}
+                                <div class="col-md-6 col-lg-4 mb-2">
+                                    <div class="card h-100">
+                                        <div class="card-header py-1">
+                                            Level {{ level }}
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="spell-slot-counter">
+                                                    <span class="fw-bold">{{ slots.used }}/{{ slots.total }}</span> used
+                                                </div>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                           title="Use a spell slot"
+                                                           onclick="updateSpellSlots('{{ character.id }}', {{ level }}, {{ slots.used + 1 }})"
+                                                           {% if slots.used >= slots.total %}disabled{% endif %}>
+                                                        Use
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success"
+                                                           title="Recover a spell slot"
+                                                           onclick="updateSpellSlots('{{ character.id }}', {{ level }}, {{ slots.used - 1 }})"
+                                                           {% if slots.used <= 0 %}disabled{% endif %}>
+                                                        Recover
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                           title="Reset all slots"
+                                                           onclick="updateSpellSlots('{{ character.id }}', {{ level }}, 0)">
+                                                        Reset
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Character Stats -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Character Stats</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Hit Points:</strong> {{ character.hp.current }}/{{ character.hp.max }}</p>
-                            <p><strong>Armor Class:</strong> {{ character.armor_class }}</p>
-                            <p><strong>Proficiency Bonus:</strong> +{{ character.proficiency_bonus }}</p>
+                                {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
+
+                    <!-- Cantrips -->
+                    {% if character.spellcasting.cantrips %}
+                    <div class="mb-4">
+                        <h5>Cantrips</h5>
+                        <div class="row">
+                            {% for cantrip in character.spellcasting.cantrips %}
+                                {% if cantrip and cantrip is string %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="list-group-item">{{ cantrip }}</div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Spells -->
+                    {% if character.spellcasting.spells %}
+                    <div>
+                        <h5>Prepared Spells</h5>
+                        {% set spell_levels = [] %}
+                        {% for spell in character.spellcasting.spells %}
+                            {% if spell is mapping and spell.level is defined and spell.level not in spell_levels %}
+                                {% set _ = spell_levels.append(spell.level) %}
+                            {% endif %}
+                        {% endfor %}
+
+                        <div class="accordion" id="spellAccordion">
+                            {% for level in spell_levels|sort %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading{{ level }}">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ level }}" aria-expanded="true" aria-controls="collapse{{ level }}">
+                                            Level {{ level }} Spells
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ level }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ level }}" data-bs-parent="#spellAccordion">
+                                        <div class="accordion-body">
+                                            <div class="row">
+                                                {% for spell in character.spellcasting.spells %}
+                                                    {% if spell is mapping and spell.level == level %}
+                                                        <div class="col-md-4 mb-2">
+                                                            <div class="list-group-item">{{ spell.name }}</div>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
 
-    <div class="row">
-        <!-- Skills -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
+    <!-- Character Traits -->
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card mb-4">
                 <div class="card-header">
-                    <h3>Skills</h3>
+                    <h4>Character Traits</h4>
                 </div>
                 <div class="card-body">
-                    <div class="skill-list">
-                        {% for skill in character.skills %}
-                            <p>{{ skill }}</p>
-                        {% else %}
-                            <p>No skills defined.</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Equipment -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Equipment</h3>
-                </div>
-                <div class="card-body">
-                    <ul>
-                        {% for item in character.equipment %}
-                            {% if item.strip() %}
-                                <li>{{ item }}</li>
-                            {% endif %}
-                        {% else %}
-                            <p>No equipment listed.</p>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Spells -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Spells</h3>
-                </div>
-                <div class="card-body">
-                    <ul>
-                        {% for spell in character.spells %}
-                            {% if spell.strip() %}
-                                <li>{{ spell }}</li>
-                            {% endif %}
-                        {% else %}
-                            <p>No spells listed.</p>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Background & Traits -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Background & Traits</h3>
-                </div>
-                <div class="card-body">
-                    <h4>Background</h4>
-                    <p>{{ character.background or 'No background information.' }}</p>
-
-                    <h4>Traits</h4>
-                    <p>{{ character.traits or 'No traits defined.' }}</p>
+                    <p>{{ character.traits|default('No traits provided.') }}</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- JavaScript for spell slot tracking -->
+<script>
+    function updateSpellSlots(characterId, level, used) {
+        // Don't allow negative values or values greater than the total
+        if (used < 0) used = 0;
+
+        fetch(`/api/character/${characterId}/spellslots`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                level: level,
+                used: used
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show updated spell slots
+                window.location.reload();
+            } else {
+                alert('Error updating spell slots: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Error updating spell slots');
+        });
+    }
+</script>
 {% endblock %}

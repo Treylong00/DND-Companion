@@ -3,91 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}D&D Character Sheets{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <title>D&D Character Manager</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-            background-color: #f5f5f5;
-        }
-        .ability-score {
-            text-align: center;
+        .ability-box {
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 10px;
             margin-bottom: 10px;
+            text-align: center;
         }
-        .ability-score .score {
-            font-size: 2rem;
+        .ability-score {
+            font-size: 1.5rem;
             font-weight: bold;
         }
-        .ability-score .modifier {
-            font-size: 1.5rem;
-        }
-        .card {
-            margin-bottom: 20px;
-        }
-        .character-sheet {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .skill-list {
-            column-count: 2;
+        .ability-modifier {
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="mb-4">
-            <h1 class="display-4 text-center">{% block header %}D&D Character Sheets{% endblock %}</h1>
-        </header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">D&D Character Manager</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('new_character') }}">New Character</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('import_character') }}">Import PDF</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="alert alert-info">
-                    <ul class="mb-0">
-                        {% for message in messages %}
-                            <li>{{ message }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
-        {% endwith %}
+    <div class="container mt-4">
+        {% for message in get_flashed_messages() %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
 
         {% block content %}{% endblock %}
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function calculateModifier(score) {
-            return Math.floor((score - 10) / 2);
-        }
-
-        function updateModifiers() {
-            document.querySelectorAll('.ability-score').forEach(abilityDiv => {
-                const scoreInput = abilityDiv.querySelector('input');
-                const modifierSpan = abilityDiv.querySelector('.modifier');
-
-                if (scoreInput && modifierSpan) {
-                    const modifier = calculateModifier(parseInt(scoreInput.value) || 10);
-                    modifierSpan.textContent = modifier >= 0 ? `+${modifier}` : modifier;
-                }
-            });
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateModifiers();
-
-            // Update when ability scores change
-            document.querySelectorAll('.ability-score input').forEach(input => {
-                input.addEventListener('input', updateModifiers);
-            });
-        });
-    </script>
-    {% block scripts %}{% endblock %}
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

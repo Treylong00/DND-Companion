@@ -1,0 +1,190 @@
+{
+  "id": "20250307221327",
+  "name": "Aries (Mars Belles)",
+  "race": "Eladrin",
+  "class": "Barbarian",
+  "level": 1,
+  "abilities": {
+    "strength": 20,
+    "dexterity": 13,
+    "constitution": 16,
+    "intelligence": 11,
+    "wisdom": 10,
+    "charisma": 14
+  },
+  "ability_modifiers": {
+    "strength": 5,
+    "dexterity": 1,
+    "constitution": 3,
+    "intelligence": 0,
+    "wisdom": 0,
+    "charisma": 2
+  },
+  "hp": {
+    "max": 15,
+    "current": 15
+  },
+  "armor_class": 14,
+  "proficiency_bonus": 2,
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "dexterity",
+      "proficient": false,
+      "bonus": 1
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "name": "Arcana",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "name": "Athletics",
+      "ability": "strength",
+      "proficient": true,
+      "bonus": 7
+    },
+    {
+      "name": "Deception",
+      "ability": "charisma",
+      "proficient": true,
+      "bonus": 4
+    },
+    {
+      "name": "History",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "name": "Insight",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "name": "Intimidation",
+      "ability": "charisma",
+      "proficient": true,
+      "bonus": 4
+    },
+    {
+      "name": "Investigation",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "name": "Medicine",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "name": "Nature",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "name": "Perception",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "name": "Performance",
+      "ability": "charisma",
+      "proficient": false,
+      "bonus": 2
+    },
+    {
+      "name": "Persuasion",
+      "ability": "charisma",
+      "proficient": true,
+      "bonus": 4
+    },
+    {
+      "name": "Religion",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "dexterity",
+      "proficient": false,
+      "bonus": 1
+    },
+    {
+      "name": "Stealth",
+      "ability": "dexterity",
+      "proficient": false,
+      "bonus": 1
+    },
+    {
+      "name": "Survival",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    }
+  ],
+  "equipment": [
+    "1 Greataxe (cleave)\r4 Handaxes (vex)\rExplorer's Pack"
+  ],
+  "spellcasting": {
+    "class": "",
+    "ability": "",
+    "spell_save_dc": 0,
+    "spell_attack_bonus": 0,
+    "spell_slots": {
+      "1": {
+        "total": 0,
+        "used": 0
+      },
+      "2": {
+        "total": 0,
+        "used": 0
+      },
+      "3": {
+        "total": 0,
+        "used": 0
+      },
+      "4": {
+        "total": 0,
+        "used": 0
+      },
+      "5": {
+        "total": 0,
+        "used": 0
+      },
+      "6": {
+        "total": 0,
+        "used": 0
+      },
+      "7": {
+        "total": 0,
+        "used": 0
+      },
+      "8": {
+        "total": 0,
+        "used": 0
+      },
+      "9": {
+        "total": 0,
+        "used": 0
+      }
+    },
+    "cantrips": [],
+    "spells": []
+  },
+  "background": "",
+  "traits": "Hates pointless sacrifice and weakness"
+}

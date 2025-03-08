@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import json
 import os
+import re
 from datetime import datetime
 from werkzeug.utils import secure_filename
 
@@ -56,6 +57,54 @@ def save_character(character_data):
         json.dump(character_data, file, indent=2)
 
     return character_id
+
+
+# Helper function to prepare spell lists for a character
+def prepare_spell_lists(character):
+    spell_lists = {
+        'level1': '',
+        'level2': '',
+        'level3': '',
+        'level4plus': ''
+    }
+
+    if character and 'spellcasting' in character and 'spells' in character['spellcasting']:
+        level1_spells = []
+        level2_spells = []
+        level3_spells = []
+        level4plus_spells = []
+
+        for spell in character['spellcasting']['spells']:
+            if spell['level'] == 1:
+                level1_spells.append(spell['name'])
+            elif spell['level'] == 2:
+                level2_spells.append(spell['name'])
+            elif spell['level'] == 3:
+                level3_spells.append(spell['name'])
+            elif spell['level'] >= 4:
+                level4plus_spells.append(f"{spell['name']} (Level {spell['level']})")
+
+        spell_lists['level1'] = '\n'.join(level1_spells)
+        spell_lists['level2'] = '\n'.join(level2_spells)
+        spell_lists['level3'] = '\n'.join(level3_spells)
+        spell_lists['level4plus'] = '\n'.join(level4plus_spells)
+
+    return spell_lists
+
+
+# Helper function to get proficient skill names
+def get_proficient_skill_names(character):
+    proficient_skills = []
+
+    if character and 'skills' in character:
+        if character['skills'] and isinstance(character['skills'][0], dict):
+            # If skills are stored as objects with name and proficient properties
+            proficient_skills = [skill['name'] for skill in character['skills'] if skill.get('proficient')]
+        else:
+            # If skills are stored as simple strings
+            proficient_skills = character['skills']
+
+    return proficient_skills
 
 
 # Routes
@@ -196,15 +245,94 @@ def edit_character(character_id):
         character['proficiency_bonus'] = int(request.form.get('proficiency_bonus', character['proficiency_bonus']))
         character['skills'] = request.form.getlist('skills')
         character['equipment'] = request.form.get('equipment', '').split('\n')
-        character['spells'] = request.form.get('spells', '').split('\n')
         character['background'] = request.form.get('background', '')
         character['traits'] = request.form.get('traits', '')
+
+        # Handle spellcasting data if the character is a spellcaster
+        if 'spellcasting' in character:
+            # Update spellcasting class and ability
+            spellcasting_class = request.form.get('spellcasting_class', '')
+            spellcasting_ability = request.form.get('spellcasting_ability', '')
+
+            if spellcasting_class:
+                character['spellcasting']['class'] = spellcasting_class
+
+            if spellcasting_ability:
+                character['spellcasting']['ability'] = spellcasting_ability
+
+                # Recalculate spell save DC and attack bonus based on the ability
+                ability_mod = character['ability_modifiers'][spellcasting_ability]
+                character['spellcasting']['spell_save_dc'] = 8 + character['proficiency_bonus'] + ability_mod
+                character['spellcasting']['spell_attack_bonus'] = character['proficiency_bonus'] + ability_mod
+
+            # Update cantrips
+            cantrips = request.form.get('cantrips', '').split('\n')
+            character['spellcasting']['cantrips'] = [c.strip() for c in cantrips if c.strip()]
+
+            # Update spells by level
+            new_spells = []
+
+            # Level 1 spells
+            level1_spells = request.form.get('spells_level_1', '').split('\n')
+            for spell_name in level1_spells:
+                if spell_name.strip():
+                    new_spells.append({
+                        'name': spell_name.strip(),
+                        'level': 1
+                    })
+
+            # Level 2 spells
+            level2_spells = request.form.get('spells_level_2', '').split('\n')
+            for spell_name in level2_spells:
+                if spell_name.strip():
+                    new_spells.append({
+                        'name': spell_name.strip(),
+                        'level': 2
+                    })
+
+            # Level 3 spells
+            level3_spells = request.form.get('spells_level_3', '').split('\n')
+            for spell_name in level3_spells:
+                if spell_name.strip():
+                    new_spells.append({
+                        'name': spell_name.strip(),
+                        'level': 3
+                    })
+
+            # Level 4+ spells (with level in parentheses)
+            level4plus_spells = request.form.get('spells_level_4', '').split('\n')
+            for spell_entry in level4plus_spells:
+                spell_entry = spell_entry.strip()
+                if spell_entry:
+                    # Try to extract the level from the format "Spell Name (Level X)"
+                    level_match = re.search(r'\(Level (\d+)\)', spell_entry)
+                    if level_match:
+                        spell_level = int(level_match.group(1))
+                        spell_name = spell_entry.split('(Level')[0].strip()
+                    else:
+                        spell_level = 4  # Default to level 4 if no level specified
+                        spell_name = spell_entry
+
+                    new_spells.append({
+                        'name': spell_name,
+                        'level': spell_level
+                    })
+
+            character['spellcasting']['spells'] = new_spells
+        else:
+            # For non-spellcasting characters, handle the simple spells list
+            character['spells'] = request.form.get('spells', '').split('\n')
 
         save_character(character)
         flash('Character updated successfully!')
         return redirect(url_for('view_character', character_id=character_id))
 
-    return render_template('character_form.html', character=character)
+    # Prepare spell lists and proficient skills before rendering the template
+    spell_lists = prepare_spell_lists(character)
+    proficient_skills = get_proficient_skill_names(character)
+
+    return render_template('character_form.html', character=character,
+                           spell_lists=spell_lists, proficient_skills=proficient_skills)
 
 
 @app.route('/character/<character_id>/delete', methods=['POST'])
@@ -230,6 +358,45 @@ def api_character(character_id):
     if character:
         return jsonify(character)
     return jsonify({'error': 'Character not found'}), 404
+
+
+@app.route('/api/character/<character_id>/spellslots', methods=['POST'])
+def update_spell_slots(character_id):
+    """
+    Update a character's spell slots usage
+    """
+    character = load_character(character_id)
+    if not character:
+        return jsonify({'error': 'Character not found'}), 404
+
+    # Check if the character has spellcasting
+    if 'spellcasting' not in character:
+        return jsonify({'error': 'Character does not have spellcasting abilities'}), 400
+
+    # Get the updated spell slot data
+    data = request.json
+    if not data or 'level' not in data or 'used' not in data:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    level = str(data['level'])
+    used = int(data['used'])
+
+    # Validate the spell slot level
+    if level not in character['spellcasting']['spell_slots']:
+        return jsonify({'error': f'Invalid spell slot level: {level}'}), 400
+
+    # Validate the usage count
+    total_slots = character['spellcasting']['spell_slots'][level]['total']
+    if used < 0 or used > total_slots:
+        return jsonify({'error': f'Invalid usage count. Must be between 0 and {total_slots}'}), 400
+
+    # Update the spell slot usage
+    character['spellcasting']['spell_slots'][level]['used'] = used
+
+    # Save the character
+    save_character(character)
+
+    return jsonify({'success': True})
 
 
 if __name__ == '__main__':
